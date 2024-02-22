@@ -24,16 +24,15 @@ public class ColorImageService {
     return new ProcessImage(originalUrl, transformedUrl);
   }
 
-  public void newBlackAndWhite(String id, File original) throws IOException {
-    var originalBytes = readAllBytes(original.toPath());
-    byte[] black = toBlackWhite(originalBytes);
-    var blackFile = File.createTempFile("temp", id);
-    try (FileOutputStream fos = new FileOutputStream(blackFile)) {
-      fos.write(black);
-    }
-    bucketComponent.upload(original, getOriginalS3Key(id));
-    bucketComponent.upload(blackFile, getTransformedS3Key(id));
-    blackFile.deleteOnExit();
+  public void newBlackAndWhite(String id, byte[] original) throws IOException {
+    var originalKey = getOriginalS3Key(id);
+    var transformedKey = getTransformedS3Key(id);
+
+    var originalFile = toTemp(id, original);
+    var transformedFile = toTemp(id, toBlackWhite(original));
+
+    bucketComponent.upload(originalFile, originalKey);
+    bucketComponent.upload(transformedFile, transformedKey);
   }
 
   private String getOriginalS3Key(String id) {
@@ -42,5 +41,14 @@ public class ColorImageService {
 
   private String getTransformedS3Key(String id) {
     return id + "-transformed";
+  }
+
+  private File toTemp(String id, byte[] bytes) throws IOException {
+    var temp = File.createTempFile("temp", id);
+    try (FileOutputStream fos = new FileOutputStream(temp)) {
+      fos.write(bytes);
+    }
+    temp.deleteOnExit();
+    return temp;
   }
 }

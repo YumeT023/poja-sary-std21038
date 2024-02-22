@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +23,7 @@ public class ColorImageController {
   @PutMapping(
       value = "/black-and-white/{id}",
       produces = {MediaType.IMAGE_PNG_VALUE})
-  public ResponseEntity<String> toBlackAndWhite(@PathVariable String id, @RequestPart File image) {
+  public ResponseEntity<String> toBlackAndWhite(@PathVariable String id, @RequestBody byte[] image) {
     try {
       service.newBlackAndWhite(id, image);
       return OK;
